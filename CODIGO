@@ -1,0 +1,465 @@
+//AVALIAÇÃO 2 DE ALGORITMOS E LINGUAGENS DE PROGRAMAÇÃO, 1º semestre de 2020 Fatec RP;
+//FEITO POR: 
+//EDUARDO PETRILLI, RA 2840482021004;
+//GUILHERME KONISHI, RA 2840482021003;
+
+#include <iostream>
+using namespace std;
+
+// Constantes nomeadas
+const int TABULEIRO_TAMANHO=15, Barco_1=2, Barco_2=4, TOTAL_POS=8, CARA=1, COROA=0;
+int menu;
+
+//menu para escolha das opções
+void Menu(){
+  cout << "  ___________________________________________  " << endl;
+  cout << " |                                           | " << endl;
+  cout << " |                    MENU                   | " << endl;
+  cout << " |___________________________________________| " << endl;
+  cout << " |                                           | " << endl;
+  cout << " |  [1]- VAMOS PARA OS MARES PARA O DUELO... | " << endl;
+  cout << " |  [2]- INSTRUÇÕES                          | " << endl;
+  cout << " |  [3]- CRÉDITOS                            | " << endl;
+  cout << " |___________________________________________| " << endl;
+  cin >> menu; 
+}
+void invalido(){
+  if(menu != 3 && menu != 2 && menu != 1){
+    cout << "OPÇÃO INVALIDA, FAVOR DIGITAR UMA VALIDA!!" << endl;
+    cout << "EM BREVE MAIS OPÇÕES" << endl;
+    return Menu();
+  }
+}
+void Instrucoes(){
+  bool instru;
+  if(menu == 2){
+    instru = true;
+  }
+  while(instru == true){
+  cout << "  ______________________________________________________ " << endl;
+  cout << " |                                                      |" << endl;
+  cout << " |                        INTRUÇÕES                     |" << endl;
+  cout << " |______________________________________________________|" << endl;
+  cout << " |                                                      |" << endl;
+  cout << " |                        COMO JOGAR                    |" << endl;
+  cout << " |                                                      |" << endl;
+  cout << " |    1- INSERIR OS NOMES DOS CAPITÃES.                 |" << endl;
+  cout << " |    2- POSICIONAR SEUS BARCOS CAPITÃO !!              |" << endl;
+  cout << " |    3- VAMOS ESCOLHER DO JEITO ANTIGO CARA OU COROA...|" << endl;
+  cout << " |    4- PREPAREM SEUS CANHÕES.........!!               |" << endl;
+  cout << " |   5- PARA ATINGIR O BARCO INIMO DIGITE AS COORDENADAS.|" << endl;
+  cout << " |   6- SE TORNA O REI DOS MARES QUEM AFUNDAR OS NAVIOS PRIMEIRO. |" << endl;
+	cout << " |      7- ENQUANTO UM JOGADOR NÃO ERRAR O TIRO CONTINUA SUA VEZ. |" << endl;
+  cout << " |________________________________________________________________|" << endl;
+  instru = false;
+  }
+  return Menu();
+}
+void Creditos(){
+  bool cred;
+  if(menu == 3){
+    cred = true;
+  }
+  while(cred == true){
+  cout << "  ______________________________________________  " << endl;
+  cout << " |                                             | " << endl;
+  cout << " |                  CRÉDITOS                   | " << endl;
+	cout << " |                                             | " << endl;
+	cout << " |                 DISCIPLINA                  | " << endl;
+	cout << " |                                             | " << endl;
+	cout << " |       ALGORITIMOS E LÓGICA DE PROGAMAÇÃO    | " << endl;
+  cout << " |                                             | " << endl;
+	cout << " |                                             | " << endl;
+  cout << " |               DESENVOLVIDO POR:             | " << endl;
+  cout << " |                                             | " << endl;
+  cout << " |  EDUARDO PETRILLI        GUILHERME KONISHI  | " << endl;
+  cout << " |                                             | " << endl;
+  cout << " |  RA: 2840482021004       RA: 2840482021003  | " << endl;
+  cout << " |                                             | " << endl;
+	cout << " |                ORiENTADO POR:               | " << endl;
+	cout << " |                                             | " << endl;
+	cout << " |         Prof. Dr. Lucas Baggio Figueira     | " << endl;
+  cout << " |_____________________________________________| " << endl;
+  cred = false;
+  }
+  return Menu();
+}
+
+// Classe Jogador
+class Jogador {
+public:
+// Atributos publicos
+string nome;
+char tabuleiro[TABULEIRO_TAMANHO][TABULEIRO_TAMANHO];
+char tabuleiro_visto[TABULEIRO_TAMANHO][TABULEIRO_TAMANHO];
+int posicoes_restantes;
+
+// Construtor
+Jogador(){
+    posicoes_restantes=TOTAL_POS;
+    for(int cont1=0;cont1<TABULEIRO_TAMANHO;cont1++){
+        for(int cont2=0;cont2<TABULEIRO_TAMANHO;cont2++){
+            tabuleiro[cont1][cont2]='~';
+            tabuleiro_visto[cont1][cont2]='~';
+        }
+    }
+}
+
+// Exibir tabuleiro
+void exibir_tabuleiro(){
+  cout << "Este é o tabuleiro de " << nome << endl;
+    for(int cont1=0;cont1<TABULEIRO_TAMANHO;cont1++){
+      for(int cont2=0;cont2 <TABULEIRO_TAMANHO; cont2++){
+        cout<< tabuleiro[cont1][cont2] << " ";
+      }
+      cout << endl;
+    }
+  cout << endl;
+  cout <<"Legenda:" << endl;
+  cout <<"~ [ÁGUA]" << endl;
+  cout <<"0 [Navio posicionado]" << endl;
+  cout << endl;
+}
+
+// Exibir tabuleiro visto
+void exibir_tabuleiro_visto(){
+  cout<<nome<<" SUA VEZ DE JOGAR....." << endl;
+  cout<<"ESTE É O TABULEIRO DO SEU OPONENTE !" << endl;
+  for(int cont1=0;cont1<TABULEIRO_TAMANHO;cont1++){
+    for(int cont2=0;cont2<TABULEIRO_TAMANHO;cont2++){
+      cout<<tabuleiro_visto[cont1][cont2]<<" ";
+    }
+    cout << endl;
+  }
+  cout << endl;
+  cout <<"LEGENDA:" << endl;
+  cout <<"~ [ÁGUA]" << endl;
+  cout <<"# [ERROU]" << endl;
+  cout <<"X [ALVO ABATIDO]" << endl;
+  cout << endl;
+}
+
+// Posicionar barcos com 2 casas
+void posicionar_barco_2(){
+// Variaveis locais
+  int linha;
+  int coluna;
+  char pos;
+  bool flag=false;
+  do{
+    exibir_tabuleiro();
+    cout<<"------------------------" << endl; 
+    cout<<"POSICIONAR BARCO 2 CASAS" << endl;
+    cout<<"------------------------" << endl;
+    cout<<"SELECIONE UMA LINHA (0-14):" << endl;
+    cin>>linha;
+    if(linha < TABULEIRO_TAMANHO && linha >=0){
+      cout<<"SELECIONE UMA COLUNA (0-14):"<< endl;
+      cin>>coluna;
+    if(coluna < TABULEIRO_TAMANHO && coluna >=0){
+      cout<<"DESEJA COLOCAR SEU BARCO NA VERTICAL OU HORIZONTAL(V/H) ?" << endl;
+      cin>>pos;
+    if(pos == 'V'|| pos=='v'){
+    // Verificar se é possivel posicionar um barco
+    if(TABULEIRO_TAMANHO-linha!=1){
+    // Verificar se não há outros barcos lá
+    int times=0;
+    for(int cont=linha;cont<linha+Barco_1;cont++){
+      if(tabuleiro[cont][coluna]=='~'){
+        times++;
+      }
+    }
+    // Se o número de espaço com água for igual ao tamaho do barco, então é possivel posicionar o barco
+    if(times==Barco_1){
+    // Posição legal
+      for(int cont=linha;cont<linha+Barco_1;cont++){
+        tabuleiro[cont][coluna]='O';
+      }
+      flag=true;
+    }
+    }
+  }else{
+    if(pos == 'H'|| pos =='h'){
+    // Verificar se é possivel posicionar um barco
+      if(TABULEIRO_TAMANHO-coluna!=1){
+      // Verificar se não há outros barcos lá
+      int times=0;
+      for(int cont=coluna;cont<coluna+Barco_1;cont++){
+        if(tabuleiro[linha][cont]=='~'){
+          times++;
+        }
+      }
+    // Se o número de espaço com água for igual ao tamaho do barco, então é possivel posicionar o barco
+        if(times==Barco_1){
+        // Posição legal
+          for(int cont=coluna;cont<coluna+Barco_1;cont++){
+            tabuleiro[linha][cont]='O';
+          }
+          flag=true;
+        }
+        }
+      }
+    }
+  }
+}
+    if(flag==false){
+      cout<<"BARCO NÃO PODE SER POSICIONADO, TENTE NOVAMENTE" << endl;
+      cout<<"Pressione enter para continuar..." << endl;   
+    }else{
+      cout<<"BARCO POSICIONADO COM SUCESSO" << endl;
+      cout<<"Pressione enter para continuar..." << endl;
+    }
+  }while(flag==false);
+}
+// Posicionar barcos com 4 casas
+void posicionar_barco_4(){
+// Variaveis locais
+  int linha;
+  int coluna;
+  char pos;
+  bool flag=false;
+  // Posicionar barco
+  do{
+    exibir_tabuleiro();
+    cout<<"------------------------" << endl;
+    cout<<"POSICIONAR BARCO 4 CASAS" << endl;
+    cout<<"------------------------" << endl;
+    cout<<"SELECIONE UMA LINHA (0-14):" << endl;
+    cin>>linha;
+    if(linha < TABULEIRO_TAMANHO && linha >=0){
+      cout<<"SELECIONE UM COLUNA(0-14):" << endl;
+      cin>>coluna;
+      if(coluna < TABULEIRO_TAMANHO && coluna >=0){
+        cout << "DESEJA COLOCAR SEU BARCO NA VERTICAL OU HORIZONTAL(V/H) ?" << endl;
+        cin>>pos;
+        if(pos == 'V'|| pos == 'v'){
+        // Verificar se é possivel posicionar um barco
+          if(TABULEIRO_TAMANHO-linha>2){
+          // Verificar se não há outros barcos lá
+            int times=0;
+            for(int cont=linha;cont<linha+Barco_2;cont++){
+              if(tabuleiro[cont][coluna]=='~'){
+                times++;
+              }
+            }
+              // Se o número de espaço com água for igual ao tamaho do barco, então é possivel posicionar o barco
+              if(times==Barco_2){
+              // Posição legal
+                for(int cont=linha;cont<linha+Barco_2;cont++){
+                  tabuleiro[cont][coluna]='O';
+                }
+                flag=true;
+              }
+            }
+          }else{
+            if(pos == 'H' || pos == 'h'){
+            // Verificar se é possivel posicionar um barco
+            if(TABULEIRO_TAMANHO-coluna>2){
+            // Verificar se não há outros barcos lá
+            int times=0;
+            for(int cont=coluna;cont<coluna+Barco_2;cont++){
+              if(tabuleiro[linha][cont]=='~'){
+                times++;
+              }
+            }
+            // Se o número de espaço com água for igual ao tamaho do barco, então é possivel posicionar o barco
+            if(times==Barco_2){
+            // Posição legal
+            for(int cont=coluna;cont<coluna+Barco_2;cont++){
+              tabuleiro[linha][cont]='O';
+            }
+            flag=true;
+            }
+          }
+        }
+      }
+  }
+}
+    if(flag==false){
+      cout<<"BARCO NÃO PODE SER POSICIONADO, TENTE NOVAMENTE" << endl;
+      cout<<"Pressione enter para continuar..." << endl;
+    }else{
+      cout<<"BARCO POSICIONADO COM SUCESSO " << endl;
+      cout<<"Pressione enter para continuar..."<< endl;   
+    }
+  }while(flag==false);
+}
+
+// Verificar posições(quantas posições já foram destruídas)
+bool verificar_pos(){
+    if(posicoes_restantes==0){
+        return false;
+    }else{
+        return true;
+    }
+}
+// Jogar
+bool jogar(Jogador *atacado){
+  // Variávei locais
+  int linha;
+  int coluna;
+  bool flag=false;
+  do{
+    exibir_tabuleiro_visto();
+    cout << endl;;
+    cout<<"-----------------------------------------"<< endl;
+    cout<<"ATACAR OPONENTE" << endl;;
+    cout<<"-----------------------------------------"<< endl;
+    cout << "SELECIONE UMA LINHA (0-14):"<< endl;
+    cin >> linha;
+      if(linha < TABULEIRO_TAMANHO && linha >=0){
+        cout << " SELECIONE UMA COLUNA (0-14):" << endl;
+        cin >> coluna;
+        if(coluna < TABULEIRO_TAMANHO && coluna >=0){
+          // Verificar se há um barco na posição
+          if(atacado->tabuleiro[linha][coluna]=='O' && tabuleiro_visto[linha][coluna]=='~'){
+            tabuleiro_visto[linha][coluna]='X';
+            atacado->posicoes_restantes--;
+            cout<<"ACERTOU !!!" << endl;;
+            cout<<"Pressione enter para continuar..."<< endl;
+            return true;
+          }else{
+            if(atacado->tabuleiro[linha][coluna]=='~' && tabuleiro_visto[linha][coluna]=='~'){
+              tabuleiro_visto[linha][coluna]='#';
+              cout<<"ERROU... QUE PENA....." << endl;
+              cout<<"Pressione enter para continuar..."<< endl;   
+              return false;
+            }
+          }
+        }
+      }
+    cout<<"DROGA CAPITÃO O CANHÃO TRAVOU, TENTE NOVAMENTE !!"<< endl;
+    cout<<"Pressione enter para continuar" << endl;  
+    }while(flag==false);
+      return false;
+  }
+};
+
+int main(){
+  // Variáveis
+  string nome_1;
+  string nome_2;
+  int vez;
+  int cont;
+  int jogador_op;
+  bool flag=false;
+  bool fim=false;
+  string op;
+	int menu;
+
+	cout << "   _____________________________ " << endl;
+	cout << "  |      v0.1 Alpha test        |" << endl;
+	cout << "  |  BEM VINDO A BATALHA NAVAL! |" << endl;
+	cout << "  |_____________________________|" << endl;
+	cout << endl;
+	cout<< "              |    |    | " << endl;
+	cout<< "              )_)  )_)  )_) " << endl;
+	cout<< "             )___))___))___) " << endl;
+	cout<< "            )____)____)_____) " << endl;
+	cout<<"           _____|____|____|______ " << endl;
+	cout<< " ---------/                   /--------- " << endl;
+	cout<< "     ^^^^^ ^^^^^^^^^^^^^^^^^^^^^ " << endl;
+	cout<< "     ^^^^      ^^^^     ^^^    ^^ " << endl;
+	cout<< "        ^^^^      ^^^ " << endl;
+
+//chamando o menu
+Menu();
+//outras opções
+invalido();
+Instrucoes();
+Creditos();
+
+  // Criando jogadores
+    cout<< "INFORME SEU NOME CAPITÃO 1:" << endl;
+    cin>>nome_1;
+    cout<< "INFORME SEU NOME CAPITÃO 2:" << endl;
+    cin>>nome_2;
+
+    Jogador *j1 = new Jogador();
+    j1->nome=nome_1;
+
+    Jogador *j2 = new Jogador();
+    j2->nome=nome_2;
+
+    //Jogador 1 posiciona as peças
+    cout<<"CAPITÃO 1 POSICIONE SEUS BARCOS" << endl;
+    cout<<"Pressione enter para começar..." << endl;
+    for(cont=0;cont<2;cont++){
+        j1->posicionar_barco_2();
+    }
+    j1->posicionar_barco_4();
+    //Jogador 2 posiciona os barcos
+    cout<<"CAPITÃO 2 POSICIONE SEUS BARCOS" << endl;
+    cout<<"Pressione enter para começar..." << endl;
+    
+    for(cont=0;cont<2;cont++){
+        j2->posicionar_barco_2();
+    }
+    j2->posicionar_barco_4();
+  // Cara ou coroa para decidir quem começa
+  do{
+    cout<<"VAMOS PARA O DUELO............" <<  endl;
+		cout << endl;
+    cout<<" Jogador 1 cara ou coroa (cara/coroa)? " << endl;
+    cin >> op;
+    if(op=="cara"|| op == "CARA"){
+      jogador_op=CARA;
+      flag=true;
+    }else{
+      if(op=="coroa" || op == "COROA"){
+        jogador_op=COROA;
+        flag=true;
+      }
+    }
+  }while(flag==false);
+
+  if(rand()%2==jogador_op){
+    vez=1;
+    cout << "CAPITAÃO 1 ("<<j1->nome<<") começa...";
+  }else{
+    vez=2;
+    cout << "CAPITÃO 2 ("<<j2->nome<<") começa...";
+  }
+  cout<<"Pressione enter para começar a batalha pelos mares" << endl;
+  // Objetos
+  Jogador *atacante = new Jogador();
+  Jogador *atacado = new Jogador();
+  Jogador *vencedor = new Jogador();
+  Jogador *perdedor = new Jogador();
+  // Jogar até atingir o fim, ou seja, fim=true
+  do{
+    if(vez==1){
+      atacante=j1;
+      atacado=j2;
+    }else{
+      atacante=j2;
+      atacado=j1;
+    }
+    while(atacante->jogar(atacado)){
+      if(!atacado->verificar_pos()){
+        vencedor=atacante;
+        perdedor=atacado;
+        fim=true;
+        break;
+      }
+    }
+    if(vez==1){
+      vez++;
+    }else{
+      vez--;
+    }
+  }while(fim==false);
+
+  // Exibir resultado final
+  cout<<"----------------------------------------------------------" << endl;
+  cout<<"                       FIM DE JOGO                        " << endl;
+  cout<<"----------------------------------------------------------" << endl;
+	cout << endl;
+	cout << endl;
+	using namespace std;
+
+  cout<<" O CAPITÃO "<<vencedor->nome<<" CONQUISTOU OS MARES DO CAPITÃO "<<perdedor->nome;
+
+  //DESENVOLVIDO POR EDUARDO PETRILLI E GUILHERME KONISHI. 1º SEMESTRE DE ALP
+    return 0;
+}
